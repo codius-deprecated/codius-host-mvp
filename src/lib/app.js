@@ -14,7 +14,7 @@ const getPort = require('get-port')
 
 const Config = require('./config')
 
-const { execSync } = require('child_process')
+const { spawnSync } = require('child_process')
 
 class App {
   constructor (deps) {
@@ -67,12 +67,20 @@ class App {
 
       const hostPort = await getPort()
 
-      const environmentOpts = Object.keys(environment).map(key => {
-        return `-e ${key}=${environment[key]}`
-      }).join(' ')
+      const environmentOpts = []
+      for (const key of Object.keys(environment)) {
+        environmentOpts.push('-e')
+        environmentOpts.push(`${key}=${environment[key]}`)
+      }
 
-      execSync(`docker pull ${image}`, { stdio: 'inherit' })
-      execSync(`docker run -d -p ${hostPort}:${port} --name ${manifestHash.substring(0, 16)} ${environmentOpts} ${image}`, { stdio: 'inherit' })
+      spawnSync('docker', [ 'pull', image ], { stdio: 'inherit' })
+      spawnSync('docker', [
+        'run', '-d',
+        '-p', `${hostPort}:${port}`,
+        '--name', manifestHash.substring(0, 16),
+        ...environmentOpts,
+        image
+      ], { stdio: 'inherit' })
 
       this.contracts[manifestHash] = {
         manifest
