@@ -58,35 +58,14 @@ class App {
     const digestToPath = (digest) =>
       path.resolve(__dirname, 'data', digest.substring(0, 2), digest)
 
-    router.options('/start', async (ctx) => {
-      const psk = ILP.PSK.generateParams({
-        destinationAccount: this.ilp.plugin.getAccount(),
-        receiverSecret: this.ilp.secret
-      })
+    const price = (ctx) => {
+      const { manifest } = ctx.request.body
+      const manifestHash = crypto.createHash('sha256').update(canonicalJson(manifest)).digest('hex')
+      return this.contracts[manifestHash] ? 0 : dropsPerMonth
+    }
 
-      ctx.set('Pay',
-        dropsPerMonth + ' ' +
-        psk.destinationAccount + ' ' +
-        psk.sharedSecret)
-
-      const paymentToken = ctx.get('Pay-Token')
-      if (paymentToken) {
-        ctx.set('Pay-Balance', (this.ilp.balances[paymentToken] || new BigNumber(0)).toNumber())
-      }
-
-      ctx.status = 204
-    })
-
-    router.post('/start', this.ilp.paid({
-      price: (ctx) => {
-        console.log('doing a thing')
-        const { manifest } = ctx.request.body
-        const manifestHash = crypto.createHash('sha256').update(canonicalJson(manifest)).digest('hex')
-
-        console.log(this.contracts[manifestHash] ? 0 : dropsPerMonth)
-        return this.contracts[manifestHash] ? 0 : dropsPerMonth
-      }
-    }), async (ctx) => {
+    router.options('/start', this.ilp.options({ price }))
+    router.post('/start', this.ilp.paid({ price }), async (ctx) => {
       const { manifest } = ctx.request.body
       const { image, environment, port } = manifest
 
