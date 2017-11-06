@@ -44,7 +44,7 @@ class App {
   listen () {
     const app = this.koa
     const router = this.router
-    const { port } = this.config
+    const { port, hostId } = this.config
 
     app.use(Logger())
     app.use(BodyParser())
@@ -92,20 +92,34 @@ class App {
       const hostPort = await getPort()
 
       const environmentOpts = []
-      for (const key of Object.keys(environment)) {
+      for (const key of Object.keys(environment || {})) {
         environmentOpts.push('-e')
         environmentOpts.push(`${key}=${environment[key]}`)
       }
 
-      spawnSync('docker', [ 'pull', image ], { stdio: 'inherit' })
-      spawnSync('docker', [
-        'run', '-d', '--rm',
-        '-p', `${hostPort}:${port}`,
-        '--name', manifestHash.substring(0, 16),
-        ...environmentOpts,
-        image,
-        ...command
-      ], { stdio: 'inherit' })
+      {
+        const { status } = spawnSync('docker', [ 'pull', image ], { stdio: 'inherit' })
+
+        if (status) {
+          throw new Error('Docker pull failed with status ' + status)
+        }
+      }
+
+      {
+        const { status } = spawnSync('docker', [
+          'run', '-d', '--rm',
+          '-p', `${hostPort}:${port}`,
+          '--name', manifestHash.substring(0, 16),
+          '--label', 'codius=' + hostId,
+          ...environmentOpts,
+          image,
+          ...command
+        ], { stdio: 'inherit' })
+
+        if (status) {
+          throw new Error('Docker run failed with status ' + status)
+        }
+      }
 
       const killTime = Date.now() + durationMs
       const killTimeout = this.setKillTime(manifestHash, killTime)
