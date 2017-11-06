@@ -28,7 +28,7 @@
     "ilp-plugin-payment-channel-framework": "^1.0.1",
     "ilp-plugin-xrp-escrow": "^1.0.3",
     "koa": "^2.3.0",
-    "koa-ilp": "0.0.1",
+    "koa-ilp": "https://github.com/justmoon/koa-ilp.git",
     "koa-logger": "^3.0.1",
     "koa-router": "^7.2.1",
     "reduct": "^3.1.0"

@@ -21,7 +21,7 @@ class Config
    */
   applyConfig (sourceObj) {
     this.port = validateInteger(sourceObj, 'CODIUS_PORT', 443)
-    this.ilpPlugin = validateString(sourceObj, 'CODIUS_ILP_PLUGIN', 'ilp-plugin-payment-channel-framework')
+    this.ilpPlugin = validateString(sourceObj, 'CODIUS_ILP_PLUGIN', 'ilp-plugin-xrp-escrow')
     this.ilpCredentials = validateJson(sourceObj, 'CODIUS_ILP_CREDENTIALS')
   }
 }

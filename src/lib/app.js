@@ -1,6 +1,7 @@
 'use strict'
 
 const fs = require('fs-extra')
+const debug = require('debug')('codius-host')
 const path = require('path')
 const crypto = require('crypto')
 const Koa = require('koa')
@@ -11,8 +12,15 @@ const Ilp = require('koa-ilp')
 const Boom = require('boom')
 const canonicalJson = require('canonical-json')
 const getPort = require('get-port')
+const ILP = require('ilp')
 
 const Config = require('./config')
+
+const dollarsPerMonth = process.env.CODIUS_DOLLARS_PER_MONTH || 5
+const dollarsPerXrp = 0.2
+const dropsPerXrp = Math.pow(10, 6)
+const xrpPerMonth = dollarsPerMonth / dollarsPerXrp
+const dropsPerMonth = xrpPerMonth * dropsPerXrp
 
 const { spawnSync } = require('child_process')
 
@@ -50,7 +58,14 @@ class App {
     const digestToPath = (digest) =>
       path.resolve(__dirname, 'data', digest.substring(0, 2), digest)
 
-    router.post('/start', /*ilp.paid({ price: 10 }),*/ async (ctx) => {
+    const price = (ctx) => {
+      const { manifest } = ctx.request.body
+      const manifestHash = crypto.createHash('sha256').update(canonicalJson(manifest)).digest('hex')
+      return this.contracts[manifestHash] ? 0 : dropsPerMonth
+    }
+
+    router.options('/start', this.ilp.options({ price }))
+    router.post('/start', this.ilp.paid({ price }), async (ctx) => {
       const { manifest } = ctx.request.body
       const { image, environment, port } = manifest
 
@@ -86,6 +101,7 @@ class App {
         manifest
       }
 
+      debug('started', manifestHash)
       ctx.status = 201
     })
 
