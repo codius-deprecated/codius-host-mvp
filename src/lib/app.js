@@ -21,6 +21,8 @@ const dollarsPerXrp = 0.2
 const dropsPerXrp = Math.pow(10, 6)
 const xrpPerMonth = dollarsPerMonth / dollarsPerXrp
 const dropsPerMonth = xrpPerMonth * dropsPerXrp
+const monthsPerSecond = 0.0000003802571
+const dropsPerSecond = dropsPerMonth * monthsPerSecond
 
 const { spawnSync } = require('child_process')
 
@@ -61,7 +63,8 @@ class App {
     const price = (ctx) => {
       const { manifest } = ctx.request.body
       const manifestHash = crypto.createHash('sha256').update(canonicalJson(manifest)).digest('hex')
-      return this.contracts[manifestHash] ? 0 : dropsPerMonth
+      const duration = ctx.query.duration || 3600
+      return this.contracts[manifestHash] ? 0 : Math.ceil(dropsPerSecond * duration)
     }
 
     router.options('/start', this.ilp.options({ price }))
@@ -69,6 +72,7 @@ class App {
       const { manifest } = ctx.request.body
       const { image, environment, port } = manifest
       const command = manifest.command || []
+      const duration = ctx.query.duration || 3600
 
       const manifestHash = crypto.createHash('sha256').update(canonicalJson(manifest)).digest('hex')
 
@@ -91,7 +95,7 @@ class App {
 
       spawnSync('docker', [ 'pull', image ], { stdio: 'inherit' })
       spawnSync('docker', [
-        'run', '-d',
+        'run', '-d', '--rm',
         '-p', `${hostPort}:${port}`,
         '--name', manifestHash.substring(0, 16),
         ...environmentOpts,
@@ -102,6 +106,14 @@ class App {
       this.contracts[manifestHash] = {
         manifest
       }
+
+      setTimeout(() => {
+        spawnSync('docker', [
+          'stop', '-t', '10',
+          manifestHash.substring(0, 16)
+        ], { stdio: 'inherit' })
+        delete this.contracts[manifestHash]
+      }, 1000 * duration)
 
       debug('started', manifestHash)
       ctx.status = 201
