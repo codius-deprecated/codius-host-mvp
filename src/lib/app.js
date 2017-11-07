@@ -61,10 +61,8 @@ class App {
       path.resolve(__dirname, 'data', digest.substring(0, 2), digest)
 
     const price = (ctx) => {
-      const { manifest } = ctx.request.body
-      const manifestHash = crypto.createHash('sha256').update(canonicalJson(manifest)).digest('hex')
       const duration = ctx.query.duration || 3600
-      return this.contracts[manifestHash] ? 0 : Math.ceil(dropsPerSecond * duration)
+      return Math.ceil(dropsPerSecond * duration)
     }
 
     router.options('/start', this.ilp.options({ price }))
@@ -73,6 +71,7 @@ class App {
       const { image, environment, port } = manifest
       const command = manifest.command || []
       const duration = ctx.query.duration || 3600
+      const durationMs = duration * 1000
 
       const manifestHash = crypto.createHash('sha256').update(canonicalJson(manifest)).digest('hex')
 
@@ -80,7 +79,12 @@ class App {
         manifestHash
       }
 
-      if (this.contracts[manifestHash]) {
+      const deployed = this.contracts[manifestHash]
+      if (deployed) {
+        clearTimeout(deployed.killTimeout)
+        deployed.killTime += durationMs
+        deployed.killTimeout = this.setKillTime(manifestHash, deployed.killTime)
+
         ctx.status = 200
         return
       }
@@ -103,17 +107,14 @@ class App {
         ...command
       ], { stdio: 'inherit' })
 
-      this.contracts[manifestHash] = {
-        manifest
-      }
+      const killTime = Date.now() + durationMs
+      const killTimeout = this.setKillTime(manifestHash, killTime)
 
-      setTimeout(() => {
-        spawnSync('docker', [
-          'stop', '-t', '10',
-          manifestHash.substring(0, 16)
-        ], { stdio: 'inherit' })
-        delete this.contracts[manifestHash]
-      }, 1000 * duration)
+      this.contracts[manifestHash] = {
+        manifest,
+        killTime,
+        killTimeout
+      }
 
       debug('started', manifestHash)
       ctx.status = 201
@@ -126,6 +127,16 @@ class App {
     app.listen(port)
 
     console.log(`Codius listening on port ${port}`)
+  }
+
+  setKillTime (manifestHash, killTime) {
+    return setTimeout(() => {
+      spawnSync('docker', [
+        'stop', '-t', '10',
+        manifestHash.substring(0, 16)
+      ], { stdio: 'inherit' })
+      delete this.contracts[manifestHash]
+    }, killTime - Date.now())
   }
 }
 
