@@ -68,6 +68,7 @@ class App {
     router.post('/start', this.ilp.paid({ price }), async (ctx) => {
       const { manifest } = ctx.request.body
       const { image, environment, port } = manifest
+      const command = manifest.command || []
 
       const manifestHash = crypto.createHash('sha256').update(canonicalJson(manifest)).digest('hex')
 
@@ -94,7 +95,8 @@ class App {
         '-p', `${hostPort}:${port}`,
         '--name', manifestHash.substring(0, 16),
         ...environmentOpts,
-        image
+        image,
+        ...command
       ], { stdio: 'inherit' })
 
       this.contracts[manifestHash] = {
