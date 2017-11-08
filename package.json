@@ -23,22 +23,26 @@
   "homepage": "https://github.com/justmoon/codius-host-mvp#readme",
   "dependencies": {
     "canonical-json": "0.0.4",
+    "chalk": "^2.3.0",
     "fs-extra": "^4.0.2",
     "get-port": "^3.2.0",
+    "http-proxy": "^1.16.2",
     "ilp-plugin-payment-channel-framework": "^1.0.1",
     "ilp-plugin-xrp-escrow": "^1.0.3",
     "koa": "^2.3.0",
     "koa-ilp": "https://github.com/justmoon/koa-ilp.git",
     "koa-logger": "^3.0.1",
     "koa-router": "^7.2.1",
-    "reduct": "^3.1.0"
+    "moment": "^2.19.1",
+    "reduct": "^3.1.0",
+    "thirty-two": "^1.0.2"
   },
   "devDependencies": {
-    "eslint": "^4.7.2",
+    "eslint": "^4.10.0",
     "eslint-config-standard": "^10.2.1",
-    "eslint-plugin-import": "^2.7.0",
-    "eslint-plugin-node": "^5.1.1",
-    "eslint-plugin-promise": "^3.5.0",
+    "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-node": "^5.2.1",
+    "eslint-plugin-promise": "^3.6.0",
     "eslint-plugin-standard": "^3.0.1"
   }
 }
