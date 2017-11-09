@@ -40,10 +40,11 @@ class Contracts {
 
     {
       const { status } = spawnSync('docker', [
-        'run', '-d', '--rm',
+        'run', '-d', /* '--rm', */
         '-p', `${hostPort}:${port}`,
         '--name', manifestHash.substring(0, 16),
         '--label', 'codius=' + hostId,
+        '--add-host', 'juaws4p4ica2xs4shfuf7w7ccbtvjwzyhf6quncit23gyl5ggv2q.local.codius.org:10.200.10.1',
         ...environmentOpts,
         image,
         ...command
