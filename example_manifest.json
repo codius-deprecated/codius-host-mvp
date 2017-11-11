@@ -1,0 +1,7 @@
+{
+  "manifest": {
+    "environment": {},
+    "port": 80,
+    "image": "nginx"
+  }
+}
