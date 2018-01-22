@@ -10,7 +10,6 @@ const Logger = require('koa-logger')
 const BodyParser = require('koa-bodyparser')
 const Ilp = require('koa-ilp')
 const Boom = require('boom')
-const ILP = require('ilp')
 
 const Config = require('./config')
 const Contracts = require('./contracts')
