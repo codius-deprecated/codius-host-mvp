@@ -29,7 +29,7 @@
     "http-proxy": "^1.16.2",
     "ilp-plugin-btp": "^1.1.4",
     "koa": "^2.3.0",
-    "koa-ilp": "https://github.com/interledgerjs/koa-ilp.git#lpi2",
+    "koa-ilp": "^1.0.0",
     "koa-logger": "^3.0.1",
     "koa-router": "^7.2.1",
     "moment": "^2.19.1",
