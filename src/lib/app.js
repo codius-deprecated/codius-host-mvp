@@ -33,10 +33,7 @@ class App {
     this.proxy = deps(Proxy)
     this.contracts = deps(Contracts)
 
-    const { ilpPlugin, ilpCredentials } = this.config
-
-    const Plugin = require(ilpPlugin)
-    const plugin = this.plugin = new Plugin(ilpCredentials)
+    const plugin = require('ilp-plugin')()
     this.ilp = new Ilp({ plugin })
   }
 
