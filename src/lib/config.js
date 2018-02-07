@@ -1,6 +1,6 @@
 'use strict'
 
-const { validateString, validateInteger, validateJson } = require('../util/validate')
+const { validateString, validateInteger } = require('../util/validate')
 
 class Config
 {
@@ -23,8 +23,6 @@ class Config
     this.port = validateInteger(sourceObj, 'CODIUS_PORT', 443)
     this.hostname = validateString(sourceObj, 'CODIUS_HOSTNAME', 'local.codius.org')
     this.hostId = validateString(sourceObj, 'CODIUS_HOST_ID', 'default')
-    this.ilpPlugin = validateString(sourceObj, 'CODIUS_ILP_PLUGIN', 'ilp-plugin-xrp-escrow')
-    this.ilpCredentials = validateJson(sourceObj, 'CODIUS_ILP_CREDENTIALS')
   }
 }
 
