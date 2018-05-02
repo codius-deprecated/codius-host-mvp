@@ -1,11 +1,11 @@
 # Codius Host MVP
 > Minimal implementation of a Codius host
 
-Running Codius Host MVP allows you to experiment with [Codius](codius.org) on
+Running Codius Host MVP allows you to experiment with [Codius](https://codius.org/) on
 your machine. It's updated to use Interledger payments with
 [HTTP-ILP](https://github.com/interledger/rfcs/blob/master/0014-http-ilp/0014-http-ilp.md#http-ilp).
 
-For a complete explanation of Codius, go to [codius.org](codius.org).
+For a complete explanation of Codius, go to [codius.org](https://codius.org/).
 
 ## Usage
 
